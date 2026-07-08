@@ -51,8 +51,12 @@ uploaded_files = st.file_uploader(
 )
 
 
+import numpy as np
+from PIL import Image
+
+
 # ===============================
-# OCR Reading
+# OCR Reading (fixed)
 # ===============================
 
 if uploaded_files:
@@ -66,14 +70,22 @@ if uploaded_files:
 
     for file in uploaded_files:
 
+        # Display image
+        image = Image.open(file)
+
         st.image(
-            file,
+            image,
             caption=file.name
         )
 
 
+        # Convert image for EasyOCR
+        image_array = np.array(image)
+
+
+        # OCR
         text = reader.readtext(
-            file,
+            image_array,
             detail=0
         )
 
@@ -87,4 +99,5 @@ if uploaded_files:
 
     st.subheader("Extracted Label Text")
 
+    st.write(combined_text)
     st.write(combined_text)
