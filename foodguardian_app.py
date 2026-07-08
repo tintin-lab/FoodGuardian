@@ -1,8 +1,24 @@
 import streamlit as st
 import easyocr
+import numpy as np
+from PIL import Image
+import re
+
+
+# ===============================
+# Title
+# ===============================
 
 st.title("FoodGuardian 🥗")
 
+st.write(
+    "Food label analysis using OCR and nutrition extraction"
+)
+
+
+# ===============================
+# User Information
+# ===============================
 
 age_group = st.selectbox(
     "Select age group",
@@ -40,6 +56,9 @@ frequency = st.selectbox(
         "Occasionally"
     ]
 )
+
+
+
 # ===============================
 # Image Upload
 # ===============================
@@ -51,36 +70,17 @@ uploaded_files = st.file_uploader(
 )
 
 
-import numpy as np
-from PIL import Image
-
 
 # ===============================
-# OCR + Nutrition Extraction
+# OCR + Extraction
 # ===============================
-
-import streamlit as st
-import easyocr
-import numpy as np
-from PIL import Image
-import re
-
-
-# Upload images
-
-uploaded_files = st.file_uploader(
-    "Upload nutrition and ingredient label images",
-    type=["jpg", "jpeg", "png"],
-    accept_multiple_files=True
-)
-
 
 if uploaded_files:
 
-    st.success("Images uploaded successfully!")
+    st.success(
+        f"{len(uploaded_files)} images uploaded successfully!"
+    )
 
-
-    # Load OCR
 
     reader = easyocr.Reader(['en'])
 
@@ -89,7 +89,7 @@ if uploaded_files:
 
 
     # -------------------------------
-    # OCR reading from all images
+    # OCR Reading
     # -------------------------------
 
     for file in uploaded_files:
@@ -103,8 +103,6 @@ if uploaded_files:
             caption=file.name
         )
 
-
-        # Convert image for OCR
 
         image_array = np.array(image)
 
@@ -140,13 +138,8 @@ if uploaded_files:
 
     text = combined_text.lower()
 
-
-    # decimal correction
-
     text = text.replace(",", ".")
 
-
-    # show OCR result
 
     st.subheader("OCR Extracted Text")
 
@@ -155,7 +148,7 @@ if uploaded_files:
 
 
     # ===============================
-    # Sodium extraction
+    # Sodium Extraction
     # ===============================
 
     sodium = 0
@@ -178,7 +171,6 @@ if uploaded_files:
             re.I
         )
 
-
         if match:
 
             sodium = float(
@@ -190,7 +182,7 @@ if uploaded_files:
 
 
     # ===============================
-    # Sugar extraction
+    # Sugar Extraction
     # ===============================
 
     sugar = 0
@@ -211,7 +203,6 @@ if uploaded_files:
 
     for pattern in sugar_patterns:
 
-
         match = re.search(
             pattern,
             text,
@@ -230,7 +221,7 @@ if uploaded_files:
 
 
     # ===============================
-    # Saturated fat extraction
+    # Saturated Fat Extraction
     # ===============================
 
     satfat = 0
@@ -248,7 +239,6 @@ if uploaded_files:
 
 
     for pattern in satfat_patterns:
-
 
         match = re.search(
             pattern,
@@ -268,11 +258,12 @@ if uploaded_files:
 
 
     # ===============================
-    # Display extracted values
+    # Display Nutrition
     # ===============================
 
-
-    st.subheader("Extracted Nutrition Values")
+    st.subheader(
+        "Extracted Nutrition Values"
+    )
 
 
     st.write(
@@ -294,4 +285,3 @@ if uploaded_files:
         satfat,
         "g"
     )
-           
