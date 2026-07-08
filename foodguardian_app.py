@@ -162,60 +162,69 @@ for pattern in sodium_patterns:
 
 # Sugar extraction
 
-# Sugar extraction (improved)
+# ===============================
+# Improved Sugar Extraction
+# ===============================
 
 sugar = 0
 
 sugar_patterns = [
-    r'total\s*sugars?\s*[\w\s]*?([\d\.]+)',
-    r'added\s*sugars?\s*[\w\s]*?([\d\.]+)',
-    r'sugars?\s*[\w\s]*?([\d\.]+)',
-    r'sugar\s*[\w\s]*?([\d\.]+)'
+
+    r'added\s*sugars?\D*(\d+\.?\d*)',
+
+    r'total\s*sugars?\D*(\d+\.?\d*)',
+
+    r'of\s*which\s*sugars?\D*(\d+\.?\d*)',
+
+    r'sugars?\D*(\d+\.?\d*)'
+
 ]
 
 
 for pattern in sugar_patterns:
 
-    sugar_match = re.search(
+    match = re.search(
         pattern,
         text,
         re.I
     )
 
-    if sugar_match:
-
-        sugar = float(
-            sugar_match.group(1)
-        )
-
+    if match:
+        sugar = float(match.group(1))
         break
 
-# Saturated fat extraction
 
-# Saturated fat extraction (improved)
+
+# ===============================
+# Improved Saturated Fat Extraction
+# ===============================
 
 satfat = 0
 
+
 satfat_patterns = [
-    r'saturated\s*fat\s*[\w\s]*?([\d\.]+)',
-    r'sat\.?\s*fat\s*[\w\s]*?([\d\.]+)',
-    r'saturates\s*[\w\s]*?([\d\.]+)'
+
+    r'saturated\s*fat\D*(\d+\.?\d*)\s*g',
+
+    r'saturates\D*(\d+\.?\d*)\s*g',
+
+    r'sat\.?\s*fat\D*(\d+\.?\d*)\s*g'
+
 ]
 
 
 for pattern in satfat_patterns:
 
-    satfat_match = re.search(
+    match = re.search(
         pattern,
         text,
         re.I
     )
 
-    if satfat_match:
-        satfat = float(
-            satfat_match.group(1)
-        )
+    if match:
+        satfat = float(match.group(1))
         break
+           
 st.subheader("Extracted Nutrition")
 
 st.write("Sodium:", sodium, "mg/100g")
