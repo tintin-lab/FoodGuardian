@@ -295,8 +295,3 @@ if uploaded_files:
         "g"
     )
            
-st.subheader("Extracted Nutrition")
-
-st.write("Sodium:", sodium, "mg/100g")
-st.write("Sugar:", sugar, "g/100g")
-st.write("Saturated fat:", satfat, "g/100g")
