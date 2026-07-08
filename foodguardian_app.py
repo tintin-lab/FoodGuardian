@@ -67,10 +67,8 @@ if uploaded_files:
 
     combined_text = ""
 
-
     for file in uploaded_files:
 
-        # Display image
         image = Image.open(file)
 
         st.image(
@@ -78,31 +76,21 @@ if uploaded_files:
             caption=file.name
         )
 
-
-        # Convert image for EasyOCR
         image_array = np.array(image)
 
-
-        # OCR
         text = reader.readtext(
             image_array,
             detail=0
         )
 
-
         extracted_text = " ".join(text)
-
 
         combined_text += "\n" + extracted_text
 
 
+    st.subheader("Number of images analyzed")
+    st.write(len(uploaded_files))
+
 
     st.subheader("Extracted Label Text")
-
     st.write(combined_text)
-    st.write(combined_text)
-    st.subheader("Number of images analyzed")
-st.write(len(uploaded_files))
-
-st.subheader("Combined OCR Text")
-st.write(combined_text)
