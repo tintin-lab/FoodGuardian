@@ -56,20 +56,31 @@ from PIL import Image
 
 
 # ===============================
-# OCR Reading (fixed)
+# OCR + Nutrition Extraction
 # ===============================
 
-# ===============================
-# OCR Reading (improved)
-# ===============================
-
+import streamlit as st
+import easyocr
 import numpy as np
 from PIL import Image
+import re
+
+
+# Upload images
+
+uploaded_files = st.file_uploader(
+    "Upload nutrition and ingredient label images",
+    type=["jpg", "jpeg", "png"],
+    accept_multiple_files=True
+)
 
 
 if uploaded_files:
 
     st.success("Images uploaded successfully!")
+
+
+    # Load OCR
 
     reader = easyocr.Reader(['en'])
 
@@ -77,9 +88,15 @@ if uploaded_files:
     combined_text = ""
 
 
+    # -------------------------------
+    # OCR reading from all images
+    # -------------------------------
+
     for file in uploaded_files:
 
+
         image = Image.open(file)
+
 
         st.image(
             image,
@@ -87,11 +104,11 @@ if uploaded_files:
         )
 
 
-        # Convert image
+        # Convert image for OCR
+
         image_array = np.array(image)
 
 
-        # OCR
         result = reader.readtext(
             image_array,
             detail=1
@@ -114,116 +131,169 @@ if uploaded_files:
 
 
         combined_text += "\n" + extracted_text
-        combined_text = combined_text.replace("\n"," ")
-        combined_text = combined_text.lower()
 
+
+
+    # -------------------------------
+    # Clean OCR text
+    # -------------------------------
+
+    text = combined_text.lower()
+
+
+    # decimal correction
+
+    text = text.replace(",", ".")
+
+
+    # show OCR result
 
     st.subheader("OCR Extracted Text")
 
-    st.write(combined_text)
+    st.code(text)
+
+
+
     # ===============================
-# Nutrition extraction
-# ===============================
+    # Sodium extraction
+    # ===============================
 
-import re
-
-
-text = combined_text.lower()
+    sodium = 0
 
 
-# Sodium extraction
+    sodium_patterns = [
 
-# Sodium extraction (improved)
+        r'sodium\D*(\d+\.?\d*)\s*(?:mg|g)',
 
-sodium = 0
+        r'na\D*(\d+\.?\d*)\s*(?:mg|g)'
 
-sodium_patterns = [
-    r'sodium\s*[\w\s\(\)]*?(\d+)',
-    r'na\s*[\w\s]*?(\d+)'
-]
+    ]
 
 
-for pattern in sodium_patterns:
+    for pattern in sodium_patterns:
 
-    sodium_match = re.search(
-        pattern,
-        text,
-        re.I
-    )
-
-    if sodium_match:
-
-        sodium = float(
-            sodium_match.group(1)
+        match = re.search(
+            pattern,
+            text,
+            re.I
         )
 
-        break
+
+        if match:
+
+            sodium = float(
+                match.group(1)
+            )
+
+            break
 
 
-# Sugar extraction
 
-# ===============================
-# Improved Sugar Extraction
-# ===============================
+    # ===============================
+    # Sugar extraction
+    # ===============================
 
-sugar = 0
-
-sugar_patterns = [
-
-    r'added\s*sugars?\D*(\d+\.?\d*)',
-
-    r'total\s*sugars?\D*(\d+\.?\d*)',
-
-    r'of\s*which\s*sugars?\D*(\d+\.?\d*)',
-
-    r'sugars?\D*(\d+\.?\d*)'
-
-]
+    sugar = 0
 
 
-for pattern in sugar_patterns:
+    sugar_patterns = [
 
-    match = re.search(
-        pattern,
-        text,
-        re.I
+        r'added\s*sugars?\D*(\d+\.?\d*)\s*(?:g|gm)',
+
+        r'total\s*sugars?\D*(\d+\.?\d*)\s*(?:g|gm)',
+
+        r'of\s*which\s*sugars?\D*(\d+\.?\d*)\s*(?:g|gm)',
+
+        r'sugars?\D*(\d+\.?\d*)\s*(?:g|gm)'
+
+    ]
+
+
+    for pattern in sugar_patterns:
+
+
+        match = re.search(
+            pattern,
+            text,
+            re.I
+        )
+
+
+        if match:
+
+            sugar = float(
+                match.group(1)
+            )
+
+            break
+
+
+
+    # ===============================
+    # Saturated fat extraction
+    # ===============================
+
+    satfat = 0
+
+
+    satfat_patterns = [
+
+        r'saturated\s*fat\D*(\d+\.?\d*)\s*(?:g|gm)',
+
+        r'saturates\D*(\d+\.?\d*)\s*(?:g|gm)',
+
+        r'sat\.?\s*fat\D*(\d+\.?\d*)\s*(?:g|gm)'
+
+    ]
+
+
+    for pattern in satfat_patterns:
+
+
+        match = re.search(
+            pattern,
+            text,
+            re.I
+        )
+
+
+        if match:
+
+            satfat = float(
+                match.group(1)
+            )
+
+            break
+
+
+
+    # ===============================
+    # Display extracted values
+    # ===============================
+
+
+    st.subheader("Extracted Nutrition Values")
+
+
+    st.write(
+        "Sodium:",
+        sodium,
+        "mg"
     )
 
-    if match:
-        sugar = float(match.group(1))
-        break
 
-
-
-# ===============================
-# Improved Saturated Fat Extraction
-# ===============================
-
-satfat = 0
-
-
-satfat_patterns = [
-
-    r'saturated\s*fat\D*(\d+\.?\d*)\s*g',
-
-    r'saturates\D*(\d+\.?\d*)\s*g',
-
-    r'sat\.?\s*fat\D*(\d+\.?\d*)\s*g'
-
-]
-
-
-for pattern in satfat_patterns:
-
-    match = re.search(
-        pattern,
-        text,
-        re.I
+    st.write(
+        "Sugar:",
+        sugar,
+        "g"
     )
 
-    if match:
-        satfat = float(match.group(1))
-        break
+
+    st.write(
+        "Saturated Fat:",
+        satfat,
+        "g"
+    )
            
 st.subheader("Extracted Nutrition")
 
