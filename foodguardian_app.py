@@ -101,3 +101,8 @@ if uploaded_files:
 
     st.write(combined_text)
     st.write(combined_text)
+    st.subheader("Number of images analyzed")
+st.write(len(uploaded_files))
+
+st.subheader("Combined OCR Text")
+st.write(combined_text)
