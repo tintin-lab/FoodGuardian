@@ -40,3 +40,51 @@ frequency = st.selectbox(
         "Occasionally"
     ]
 )
+# ===============================
+# Image Upload
+# ===============================
+
+uploaded_files = st.file_uploader(
+    "Upload nutrition and ingredient label images",
+    type=["jpg", "jpeg", "png"],
+    accept_multiple_files=True
+)
+
+
+# ===============================
+# OCR Reading
+# ===============================
+
+if uploaded_files:
+
+    st.success("Images uploaded successfully!")
+
+    reader = easyocr.Reader(['en'])
+
+    combined_text = ""
+
+
+    for file in uploaded_files:
+
+        st.image(
+            file,
+            caption=file.name
+        )
+
+
+        text = reader.readtext(
+            file,
+            detail=0
+        )
+
+
+        extracted_text = " ".join(text)
+
+
+        combined_text += "\n" + extracted_text
+
+
+
+    st.subheader("Extracted Label Text")
+
+    st.write(combined_text)
