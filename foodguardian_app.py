@@ -94,3 +94,57 @@ if uploaded_files:
 
     st.subheader("Extracted Label Text")
     st.write(combined_text)
+    # ===============================
+# Nutrition extraction
+# ===============================
+
+import re
+
+
+text = combined_text.lower()
+
+
+# Sodium extraction
+
+sodium = 0
+
+sodium_match = re.search(
+    r'sodium\s*(?:mg)?\s*(\d+)',
+    text
+)
+
+if sodium_match:
+    sodium = float(sodium_match.group(1))
+
+
+# Sugar extraction
+
+sugar = 0
+
+sugar_match = re.search(
+    r'sugars?\s*(?:g)?\s*([\d\.]+)',
+    text
+)
+
+if sugar_match:
+    sugar = float(sugar_match.group(1))
+
+
+# Saturated fat extraction
+
+satfat = 0
+
+satfat_match = re.search(
+    r'saturated\s*fat\s*(?:g)?\s*([\d\.]+)',
+    text
+)
+
+if satfat_match:
+    satfat = float(satfat_match.group(1))
+
+
+st.subheader("Extracted Nutrition")
+
+st.write("Sodium:", sodium, "mg/100g")
+st.write("Sugar:", sugar, "g/100g")
+st.write("Saturated fat:", satfat, "g/100g")
