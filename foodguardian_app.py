@@ -59,13 +59,23 @@ from PIL import Image
 # OCR Reading (fixed)
 # ===============================
 
+# ===============================
+# OCR Reading (improved)
+# ===============================
+
+import numpy as np
+from PIL import Image
+
+
 if uploaded_files:
 
     st.success("Images uploaded successfully!")
 
     reader = easyocr.Reader(['en'])
 
+
     combined_text = ""
+
 
     for file in uploaded_files:
 
@@ -76,23 +86,40 @@ if uploaded_files:
             caption=file.name
         )
 
+
+        # Convert image
         image_array = np.array(image)
 
-        text = reader.readtext(
+
+        # OCR
+        result = reader.readtext(
             image_array,
-            detail=0
+            detail=1
         )
 
-        extracted_text = " ".join(text)
+
+        extracted_lines = []
+
+
+        for item in result:
+
+            extracted_lines.append(
+                item[1]
+            )
+
+
+        extracted_text = " ".join(
+            extracted_lines
+        )
+
 
         combined_text += "\n" + extracted_text
+        combined_text = combined_text.replace("\n"," ")
+        combined_text = combined_text.lower()
 
 
-    st.subheader("Number of images analyzed")
-    st.write(len(uploaded_files))
+    st.subheader("OCR Extracted Text")
 
-
-    st.subheader("Extracted Label Text")
     st.write(combined_text)
     # ===============================
 # Nutrition extraction
@@ -106,43 +133,89 @@ text = combined_text.lower()
 
 # Sodium extraction
 
+# Sodium extraction (improved)
+
 sodium = 0
 
-sodium_match = re.search(
-    r'sodium\s*(?:mg)?\s*(\d+)',
-    text
-)
+sodium_patterns = [
+    r'sodium\s*[\w\s\(\)]*?(\d+)',
+    r'na\s*[\w\s]*?(\d+)'
+]
 
-if sodium_match:
-    sodium = float(sodium_match.group(1))
+
+for pattern in sodium_patterns:
+
+    sodium_match = re.search(
+        pattern,
+        text,
+        re.I
+    )
+
+    if sodium_match:
+
+        sodium = float(
+            sodium_match.group(1)
+        )
+
+        break
 
 
 # Sugar extraction
 
+# Sugar extraction (improved)
+
 sugar = 0
 
-sugar_match = re.search(
-    r'sugars?\s*(?:g)?\s*([\d\.]+)',
-    text
-)
+sugar_patterns = [
+    r'total\s*sugars?\s*[\w\s]*?([\d\.]+)',
+    r'added\s*sugars?\s*[\w\s]*?([\d\.]+)',
+    r'sugars?\s*[\w\s]*?([\d\.]+)',
+    r'sugar\s*[\w\s]*?([\d\.]+)'
+]
 
-if sugar_match:
-    sugar = float(sugar_match.group(1))
 
+for pattern in sugar_patterns:
+
+    sugar_match = re.search(
+        pattern,
+        text,
+        re.I
+    )
+
+    if sugar_match:
+
+        sugar = float(
+            sugar_match.group(1)
+        )
+
+        break
 
 # Saturated fat extraction
 
+# Saturated fat extraction (improved)
+
 satfat = 0
 
-satfat_match = re.search(
-    r'saturated\s*fat\s*(?:g)?\s*([\d\.]+)',
-    text
-)
-
-if satfat_match:
-    satfat = float(satfat_match.group(1))
+satfat_patterns = [
+    r'saturated\s*fat\s*[\w\s]*?([\d\.]+)',
+    r'sat\.?\s*fat\s*[\w\s]*?([\d\.]+)',
+    r'saturates\s*[\w\s]*?([\d\.]+)'
+]
 
 
+for pattern in satfat_patterns:
+
+    satfat_match = re.search(
+        pattern,
+        text,
+        re.I
+    )
+
+    if satfat_match:
+        satfat = float(
+            satfat_match.group(1)
+        )
+        break
 st.subheader("Extracted Nutrition")
 
 st.write("Sodium:", sodium, "mg/100g")
