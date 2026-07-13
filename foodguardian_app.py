@@ -1,6 +1,3 @@
-# ===============================
-# Nutrition Parser
-# ===============================
 
 # Clean OCR text
 text = combined_text.lower()
